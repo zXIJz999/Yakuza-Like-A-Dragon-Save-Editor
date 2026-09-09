@@ -5,7 +5,7 @@ A save editor for Yakuza: Like a Dragon (PS4) decrypted saves. Built with DevExp
 ## Features
 
 - **General** - Money, management funds, play time, difficulty, stomach, clothing, drunk level, battle style
-- **Save Title & Subtitle** - Edit the PS4 save title and subtitle (writes to `param.sfo`)
+- **Save Title & Subtitle** - Edit the PS4 save title and subtitle (not sure if this even works didnt test)
 - **Save Icon** - Change the PS4 save icon (`icon0.png`), accepts any image format, auto-resized to 228x128 and converted to PNG
 - **Characters** - Level, EXP, HP, heat, bonus stats for all party members
 - **Jobs** - Per-character job levels and EXP

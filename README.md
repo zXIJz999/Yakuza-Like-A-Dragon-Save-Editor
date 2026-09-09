@@ -5,7 +5,7 @@ A save editor for Yakuza: Like a Dragon (PS4) decrypted saves. Built with DevExp
 ## Features
 
 - **General** - Money, management funds, play time, difficulty, stomach, clothing, drunk level, battle style
-- **Save Title & Subtitle** - Edit the PS4 save title and subtitle (writes to `param.sfo`)
+- **Save Title & Subtitle** - Edit the PS4 save title and subtitle (might not even work didnt test)
 - **Save Icon** - Change the PS4 save icon (`icon0.png`), accepts any image format, auto-resized to 228x128 and converted to PNG
 - **Characters** - Level, EXP, HP, heat, bonus stats for all party members
 - **Jobs** - Per-character job levels and EXP
@@ -35,6 +35,18 @@ The editor preserves the exact file size of your decrypted save so re-encryption
 4. Save or Save As
 5. Re-encrypt and resign yourself
 
+## Building
+
+**With Visual Studio:**
+1. Clone the repo
+2. Open `YakuzaSaveEditor.sln`
+3. Build > Publish or just Build
+
+**Without Visual Studio:**
+1. Install the [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+2. Run `build.bat`
+
+
 ## Bugs
 
 If there are bugs with the editor feel free to fix it yourself or DM me on Discord: **zxijz_**
@@ -43,7 +55,7 @@ Do NOT DM me "yo", "hey", etc. and wait for me to reply. I simply won't reply. G
 
 ## Credits
 
-Thanks to [NextGenUpdate](https://nextgenupdate.com/forums/ps4-game-save-modding/1031045-yakuza-4-7-items.html) for the item IDs and names for the inventory.
+Thanks to [Veryan](https://nextgenupdate.com/forums/ps4-game-save-modding/1031045-yakuza-4-7-items.html) for the item IDs and names for the inventory.
 
 By zXIJz
 

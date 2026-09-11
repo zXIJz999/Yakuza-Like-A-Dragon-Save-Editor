@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
@@ -14,7 +14,8 @@ public class MainForm : XtraForm
     XtraTabControl _tabs = null!;
     LabelControl _welcome = null!;
 
-    SpinEdit _money = null!, _mgmtFunds = null!, _playtick = null!, _difficulty = null!;
+    SpinEdit _money = null!, _mgmtFunds = null!, _difficulty = null!;
+    SpinEdit _playTime = null!;
     SpinEdit _stomachNow = null!, _stomachMax = null!, _clothing = null!, _drunkMax = null!, _battleStyle = null!;
     SpinEdit _compRank = null!, _compTarget = null!, _compTurns = null!, _compPeriod = null!, _compStock = null!, _compScale = null!;
     SpinEdit _sceneId = null!, _sceneConfig = null!, _stage = null!, _dayNight = null!;
@@ -881,7 +882,9 @@ public class MainForm : XtraForm
 
         _money = MakeSpin(sc, "Money", 20, 160);
         _mgmtFunds = MakeSpin(sc, "Management Funds", 20, 220);
-        _playtick = MakeSpin(sc, "Play Tick", 20, 280, long.MaxValue);
+        
+        _playTime = MakeSpin(sc, "Play Time (Seconds)", 20, 280, long.MaxValue);
+        
         _difficulty = MakeSpin(sc, "Difficulty", 20, 340, 10);
         _stomachNow = MakeSpin(sc, "Stomach Now", 300, 160, 9999);
         _stomachMax = MakeSpin(sc, "Stomach Max", 300, 220, 9999);
@@ -1070,12 +1073,25 @@ public class MainForm : XtraForm
         SuspendLayout();
 
         var sfoPath = _save.GetParamSfoPath();
+        long secondsFromSfo = -1;
         if (sfoPath != null)
         {
             _saveTitle.Text = SaveData.ReadSfoString(sfoPath, "MAINTITLE") ?? _save.GetTitle();
             _saveSubtitle.Text = SaveData.ReadSfoString(sfoPath, "SUBTITLE") ?? _save.GetSubtitle();
             _saveTitle.Enabled = true;
             _saveSubtitle.Enabled = true;
+
+            var detail = SaveData.ReadSfoString(sfoPath, "DETAIL");
+            if (detail != null)
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(detail, @"Play Time:\s*(\d+):(\d+):(\d+)");
+                if (match.Success)
+                {
+                    secondsFromSfo = int.Parse(match.Groups[1].Value) * 3600 +
+                                     int.Parse(match.Groups[2].Value) * 60 +
+                                     int.Parse(match.Groups[3].Value);
+                }
+            }
         }
         else
         {
@@ -1107,7 +1123,7 @@ public class MainForm : XtraForm
 
         _money.EditValue = _save.GetPoint(1);
         _mgmtFunds.EditValue = _save.GetPoint(330);
-        _playtick.EditValue = _save.GetPlayTick();
+        _playTime.EditValue = secondsFromSfo >= 0 ? secondsFromSfo : (_save.GetPlayTick() / 1000);
         _difficulty.EditValue = _save.GetDifficulty();
         _stomachNow.EditValue = (decimal)_save.GetStomachNow();
         _stomachMax.EditValue = (decimal)_save.GetStomachMax();
@@ -1183,10 +1199,20 @@ public class MainForm : XtraForm
         {
             SaveData.WriteSfoString(sfoPath, "MAINTITLE", _saveTitle.Text);
             SaveData.WriteSfoString(sfoPath, "SUBTITLE", _saveSubtitle.Text);
+            
+            var detail = SaveData.ReadSfoString(sfoPath, "DETAIL");
+            if (detail != null)
+            {
+                long playTimeSeconds = Convert.ToInt64(_playTime.EditValue);
+                var ts = TimeSpan.FromSeconds(playTimeSeconds);
+                string tsStr = $"{(int)ts.TotalHours}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+                
+                detail = System.Text.RegularExpressions.Regex.Replace(detail, @"Play Time:\s*[0-9:]+", $"Play Time: {tsStr}");
+                detail = System.Text.RegularExpressions.Regex.Replace(detail, @"Money:\s*\d+", $"Money: {Convert.ToInt64(_money.EditValue)}");
+                
+                SaveData.WriteSfoString(sfoPath, "DETAIL", detail);
+            }
         }
-        _save.SetPoint(1, Convert.ToInt64(_money.EditValue));
-        _save.SetPoint(330, Convert.ToInt64(_mgmtFunds.EditValue));
-        _save.SetPlayTick(Convert.ToInt64(_playtick.EditValue));
         _save.SetDifficulty(Convert.ToInt32(_difficulty.EditValue));
         _save.SetStomach((float)Convert.ToDouble(_stomachNow.EditValue), (float)Convert.ToDouble(_stomachMax.EditValue));
         _save.SetClothing(Convert.ToInt32(_clothing.EditValue));
@@ -1200,6 +1226,10 @@ public class MainForm : XtraForm
         if (_ptsGrid.DataSource is DataTable ptsDt) _save.ApplyPointsTable(ptsDt);
         if (_karaokeGrid.DataSource is DataTable karDt) _save.ApplyKaraokeTable(karDt);
         if (_cartGrid.DataSource is DataTable cartDt) _save.ApplyDragonCartTable(cartDt);
+
+        _save.SetPoint(1, Convert.ToInt64(_money.EditValue));
+        _save.SetPoint(330, Convert.ToInt64(_mgmtFunds.EditValue));
+        _save.SetPlayTick(Convert.ToInt64(_playTime.EditValue) * 1000);
 
         _save.SetCompanyMaxRank(Convert.ToInt32(_compRank.EditValue));
         _save.SetCompanyTargetRank(Convert.ToInt32(_compTarget.EditValue));
